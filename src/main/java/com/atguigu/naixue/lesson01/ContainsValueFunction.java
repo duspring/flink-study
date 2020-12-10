@@ -42,25 +42,38 @@ public class ContainsValueFunction
                         "totalStr", // 状态的名字
                         //  Spark
                         new AggregateFunction<Long, String, String>() {
+                            // 初始化辅助变量
                             @Override
                             public String createAccumulator() {
-                                return null;
+                                return "Contains: ";
                             }
 
+                            /**
+                             *
+                             * @param value
+                             * @param accumulator
+                             * @return
+                             */
                             @Override
                             public String add(Long value, String accumulator) {
-                                return null;
-                            }
-
-                            @Override
-                            public String getResult(String accumulator) {
-                                return null;
+                                if ("Contains: ".equals(accumulator)) {
+                                    // Contains: 3
+                                    return accumulator + value;
+                                }
+                                // Contains: 3 and 5
+                                return accumulator + " and " + value;
                             }
 
                             @Override
                             public String merge(String a, String b) {
-                                return null;
+                                return a + " and " + b;
                             }
+
+                            @Override
+                            public String getResult(String accumulator) {
+                                return accumulator;
+                            }
+
                         }, String.class); // 状态存储的数据类型
 
         totalStr = getRuntimeContext().getAggregatingState(descriptor);
@@ -75,9 +88,20 @@ public class ContainsValueFunction
      * @throws Exception
      */
     @Override
-    public void flatMap(Tuple2<Long, Long> element, Collector<Tuple2<Long, String>> out) throws Exception {
+    public void flatMap(Tuple2<Long, Long> element,
+                        Collector<Tuple2<Long, String>> out) throws Exception {
         totalStr.add(element.f1);
+
         out.collect(Tuple2.of(element.f0, totalStr.get()));
+
+        /**
+         * (1,Contains: 3)
+         * (2,Contains: 4)
+         * (2,Contains: 4 and 2)
+         * (1,Contains: 3 and 7)
+         * (2,Contains: 4 and 2 and 6)
+         * (1,Contains: 3 and 7 and 5)
+         */
     }
 
 }
