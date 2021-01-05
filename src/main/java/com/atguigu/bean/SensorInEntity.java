@@ -8,7 +8,7 @@ import java.util.Date;
  * @description:
  * @date: 2021/1/5 14:44
  */
-public class SensorEntity {
+public class SensorInEntity {
 
     // T1 Q1
     private String sensorType;
@@ -17,16 +17,7 @@ public class SensorEntity {
 
     private String value;
 
-    public SensorEntity() {
-    }
-
-    public SensorEntity(String sensorTime, Double value) {
-        System.out.println("报表结果：");
-        DecimalFormat df = new DecimalFormat("#.00");
-        System.out.println("温度：" + sensorTime.substring(0,10) + " " + df.format(value));
-    }
-
-    public SensorEntity(String data) {
+    public SensorInEntity(String data) {
         String sensorFlag = data.split(",")[0];
         if (sensorFlag.equals("T1")) { // T1
             String[] values = data.split(",");
@@ -42,7 +33,7 @@ public class SensorEntity {
         }
     }
 
-    public SensorEntity(String sensorType, String sensorTime, String value) {
+    public SensorInEntity(String sensorType, String sensorTime, String value) {
         this.sensorType = sensorType;
         this.sensorTime = sensorTime;
         this.value = value;

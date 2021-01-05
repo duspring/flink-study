@@ -1,7 +1,6 @@
 package com.atguigu.thoughtworks;
 
-import com.atguigu.bean.SensorEntity;
-import com.atguigu.bean.WaterSensor;
+import com.atguigu.bean.SensorInEntity;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -20,8 +19,8 @@ public class IoTHandler {
         env.setParallelism(1);
 
         // 从文件读取数据、转换成 bean对象
-        SingleOutputStreamOperator<SensorEntity> sensorDS = env.readTextFile("input/ioT.txt")
-                .map((MapFunction<String, SensorEntity>) value -> new SensorEntity(value));
+        SingleOutputStreamOperator<SensorInEntity> sensorDS = env.readTextFile("input/ioT.txt")
+                .map((MapFunction<String, SensorInEntity>) value -> new SensorInEntity(value));
 
         sensorDS.keyBy(new MyKeySelector())
         .flatMap(new ComputeAverageWithListState())
@@ -34,9 +33,9 @@ public class IoTHandler {
     /**
      * MyKeySelector
      */
-    public static class MyKeySelector implements KeySelector<SensorEntity, String> {
+    public static class MyKeySelector implements KeySelector<SensorInEntity, String> {
         @Override
-        public String getKey(SensorEntity value) throws Exception {
+        public String getKey(SensorInEntity value) throws Exception {
             return value.getSensorType();
         }
     }
