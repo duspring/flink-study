@@ -101,6 +101,8 @@ public class ComputeAverageWithListState extends RichFlatMapFunction<SensorInEnt
             ArrayList<SensorInEntity> allElements = Lists.newArrayList(elementsByKey.get());
 
             if (allElements.size() == 5) {
+                List<Double> metricList = new ArrayList<>();
+                List<Double> metricList01 = new ArrayList<>();
                 for (int i = 0; i < allElements.size(); i++) {
                     // AB:37.8,AE:100,CE:0.11
 //                    System.out.println(allElements.get(i).getValue());
@@ -112,11 +114,17 @@ public class ComputeAverageWithListState extends RichFlatMapFunction<SensorInEnt
                         if (MetricTypeEnum.AB.getCode().equals(metricStr[0])) {
                             // 取出指标值
                             Double metricValue = Double.valueOf(metricStr[1]);
-                            System.out.println(metricValue);
-
+                            Double metricValue01 = Double.valueOf(metricStr[1]);
+//                            System.out.println(metricValue);
+                            metricList.add(metricValue);
+                            DecimalFormat df = new DecimalFormat("#.00");
+                            Double aDouble = Double.valueOf(df.format(metricValue01 * 1.1));
+                            metricList01.add(aDouble);
                         }
                     }
                 }
+                System.out.println(metricList);
+                System.out.println(metricList01);
             }
 
 
