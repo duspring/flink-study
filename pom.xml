@@ -16,6 +16,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <log4j.version>2.12.1</log4j.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <dependencies>
@@ -91,7 +92,11 @@
             <version>${flink.version}</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
 
 
     </dependencies>

@@ -9,7 +9,9 @@ public enum MetricTypeEnum {
 
     AB("AB", "酸度"),
     AE("AE", "粘稠度"),
-    CE("CE", "含水量");
+    CE("CE", "含水量"),
+    FIRST("FIRST","第一次"),
+    SECOND("SECOND", "第二次");
 
     private String code;
     private String desc;

@@ -22,6 +22,8 @@ public class ComputeAverageWithListState extends RichFlatMapFunction<SensorInEnt
 
     private ListState<SensorInEntity> elementsByKey;
 
+    private Double avg;
+
     /**
      *
      * @param parameters
@@ -71,20 +73,18 @@ public class ComputeAverageWithListState extends RichFlatMapFunction<SensorInEnt
                     sum += Long.valueOf(ele.getValue());
                 }
 
-                String warningTitle = "异常检测结果：\n";
-                double avg = (double) sum / count;
+                String warningTitle = "输出：\n异常检测结果：\n";
+                avg = (double) sum / count;
                 if ((Double.valueOf(element.getValue()) - avg) > 3 ) {
-                    System.out.println(warningTitle + element.getSensorType()+","+element.getSensorTime()+element.getValue()+";温度过高");
-                }
 
-                String printTitle = "报表结果：\n";
-                DecimalFormat df = new DecimalFormat("#.00");
-                String printInfo = printTitle + "温度：" + element.getSensorTime().substring(0,10) + " " + df.format(avg);
-                out.collect(printInfo);
-                // 清除状态
-                elementsByKey.clear();
+                    String printInfo = warningTitle + element.getSensorType()+","+element.getSensorTime()+","+element.getValue()+";温度过高";
+                    out.collect(printInfo);
+                    // 清除状态
+                    elementsByKey.clear();
+                }
             }
         } else if ("Q1".equals(element.getSensorType())) {
+            // Q1,2020-01-30 19:30:10,AB:37.8,AE:100,CE:0.11;
 
             // 拿到当前的 key 的状态值
             Iterable<SensorInEntity> currentState = elementsByKey.get();
@@ -101,35 +101,83 @@ public class ComputeAverageWithListState extends RichFlatMapFunction<SensorInEnt
             ArrayList<SensorInEntity> allElements = Lists.newArrayList(elementsByKey.get());
 
             if (allElements.size() == 5) {
-                List<Double> metricList = new ArrayList<>();
-                List<Double> metricList01 = new ArrayList<>();
+                String sensorType = null;
+                String sensorTime = null;
+                List<String> sensorTimeList = new ArrayList<>();
+                List<Double> metricListAB = new ArrayList<>();
+                List<Double> metricListAE = new ArrayList<>();
+                List<Double> metricListCE = new ArrayList<>();
                 for (int i = 0; i < allElements.size(); i++) {
+                    sensorType = allElements.get(i).getSensorType();
+                    sensorTime = allElements.get(i).getSensorTime();
                     // AB:37.8,AE:100,CE:0.11
-//                    System.out.println(allElements.get(i).getValue());
                     String[] values = allElements.get(i).getValue().split(",");
+                    // [AB:37.8,AE:100,CE:0.11]
+                    sensorTimeList.add(sensorTime);
                     for (int j = 0; j < values.length; j++) {
-//                        System.out.println(values[j]);
                         String[] metricStr = values[j].split(":");
-//                        System.out.println(Arrays.toString(metricStr));
                         if (MetricTypeEnum.AB.getCode().equals(metricStr[0])) {
-                            // 取出指标值
+                            // 取出AB指标值
                             Double metricValue = Double.valueOf(metricStr[1]);
-                            Double metricValue01 = Double.valueOf(metricStr[1]);
-//                            System.out.println(metricValue);
-                            metricList.add(metricValue);
-                            DecimalFormat df = new DecimalFormat("#.00");
-                            Double aDouble = Double.valueOf(df.format(metricValue01 * 1.1));
-                            metricList01.add(aDouble);
+                            metricListAB.add(metricValue);
+                        }
+                        if (MetricTypeEnum.AE.getCode().equals(metricStr[0])) {
+                            // 取出AE指标值
+                            Double metricValue = Double.valueOf(metricStr[1]);
+                            metricListAE.add(metricValue);
+                        }
+                        if (MetricTypeEnum.CE.getCode().equals(metricStr[0])) {
+                            // 取出CE指标值
+                            Double metricValue = Double.valueOf(metricStr[1]);
+                            metricListCE.add(metricValue);
                         }
                     }
                 }
-                System.out.println(metricList);
-                System.out.println(metricList01);
+                // System.out.println(sensorTimeList);
+                for (int i = 0; i < metricListAB.size(); i++) {
+                    double dv = metricListAB.get(i) * 1.01;
+                    if (i+2 == metricListAB.size()) {
+                        break;
+                    }
+                    if (dv < metricListAB.get(i+1) && dv < metricListAB.get(i+2)) {
+                        System.out.println(sensorType + "," + sensorTimeList.get(i+1) + "," + MetricTypeEnum.AB.getDesc()+":"+ metricListAB.get(i+1) + " 第一次"+MetricTypeEnum.AB.getDesc()+"过高");
+                        System.out.println(sensorType + "," + sensorTimeList.get(i+2) + "," + MetricTypeEnum.AB.getDesc()+":"+ metricListAB.get(i+2) + " 第二次"+MetricTypeEnum.AB.getDesc()+"过高");
+                    }
+                }
+                for (int i = 0; i < metricListAE.size(); i++) {
+                    double dv = metricListAE.get(i) * 1.01;
+                    if (i+2 == metricListAE.size()) {
+                        break;
+                    }
+                    if (dv < metricListAE.get(i+1) && dv < metricListAE.get(i+2)) {
+                        //System.out.println(i+1 + "->" + metricList01.get(i+1));
+                        //System.out.println(i+2 + "->" + metricList01.get(i+2));
+                        System.out.println(sensorType + "," + sensorTime + "," + MetricTypeEnum.AE.getDesc()+":"+ metricListAE.get(i+1) + " 第一次"+MetricTypeEnum.AE.getDesc()+"过高");
+                        System.out.println(sensorType + "," + sensorTime + "," + MetricTypeEnum.AE.getDesc()+":"+ metricListAE.get(i+2) + " 第二次"+MetricTypeEnum.AE.getDesc()+"过高");
+                    }
+                }
+                for (int i = 0; i < metricListCE.size(); i++) {
+                    double dv = metricListCE.get(i) * 1.01;
+                    if (i+2 == metricListCE.size()) {
+                        break;
+                    }
+                    if (dv < metricListCE.get(i+1) && dv < metricListCE.get(i+2)) {
+                        //System.out.println(i+1 + "->" + metricList02.get(i+1));
+                        //System.out.println(i+2 + "->" + metricList02.get(i+2));
+                        System.out.println(sensorType + "," + sensorTime + "," + MetricTypeEnum.CE.getDesc()+":"+ metricListCE.get(i+1) + " 第一次"+MetricTypeEnum.CE.getDesc()+"过高");
+                        System.out.println(sensorType + "," + sensorTime + "," + MetricTypeEnum.CE.getDesc()+":"+ metricListCE.get(i+2) + " 第二次"+MetricTypeEnum.CE.getDesc()+"过高");
+                    }
+                }
+
+                String printTitle = "报表结果：\n";
+                DecimalFormat df = new DecimalFormat("#.00");
+                String printInfo = printTitle + "温度：" + element.getSensorTime().substring(0,10) + " " + df.format(avg);;
+                out.collect(printInfo);
+                // 清除状态
+                elementsByKey.clear();
+
             }
 
-
-//            String value = element.getValue();
-//            System.out.println(value);
         }
 
     }
