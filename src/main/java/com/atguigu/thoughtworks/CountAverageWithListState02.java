@@ -66,6 +66,12 @@ public class CountAverageWithListState02
     }
 
 
+    /**
+     * 处理T传感器数据
+     * @param value
+     * @param out
+     * @throws Exception
+     */
     @Override
     public void flatMap1(Tuple3<String, String, String> value, Collector<String> out) throws Exception {
 
@@ -109,6 +115,12 @@ public class CountAverageWithListState02
         }
     }
 
+    /**
+     * 处理Q传感器数据
+     * @param value
+     * @param out
+     * @throws Exception
+     */
     @Override
     public void flatMap2(Tuple3<String, String, String> value, Collector<String> out) throws Exception {
 
