@@ -1,5 +1,6 @@
 package com.atguigu.thoughtworks;
 
+import com.atguigu.bean.FileUtils;
 import com.atguigu.naixue.lesson01.CountAverageWithValueState;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.ConnectedStreams;
@@ -7,6 +8,9 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.CoFlatMapFunction;
 import org.apache.flink.util.Collector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: spring du
@@ -25,6 +29,16 @@ public class TestKeyedStateMain01 {
         // 设置并行度
         env.setParallelism(1);
         // 获取数据源
+        List<String> inputs = FileUtils.readFile("ioT.txt");
+        List<String> sensorTList = new ArrayList<>();
+        List<String> sensorQList = new ArrayList<>();
+        inputs.forEach(line -> {
+            if (line.startsWith("T1")) {
+                sensorTList.add(line.substring(0, line.length()-1));
+            } else {
+                sensorQList.add(line.substring(0, line.length()-1));
+            }
+        });
 
         DataStreamSource<Tuple3<String, String, String>> dataStreamTSource = env.fromElements(
                 Tuple3.of("T1", "2020-01-30 19:00:01", "25"),
