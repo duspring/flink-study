@@ -105,7 +105,7 @@ public class CountAverageWithListState02
             String warningTitle = "输出："+"\n"+"异常检测结果："+"\n";
             if ((Double.valueOf(value.f2) - avg) > 3 ) {
 
-                String printInfo = warningTitle + value.f0+","+value.f1+","+value.f0+";"+"温度"+"过高";
+                String printInfo = warningTitle + value.f0+","+value.f1+","+value.f2+";"+"温度"+"过高";
                 out.collect(printInfo);
                 // 清除状态
                 listTState.clear();
